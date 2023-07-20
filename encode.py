@@ -68,11 +68,13 @@ def df_to_sparse(df, Q_mat, active_features, tw=None, verbose=True):
 	if 'fails' in active_features:
 		X["fails"] = sparse.csr_matrix(np.empty((0, Q_mat.shape[1])))
 
-	X['df'] = np.empty((0,5)) # Keep track of the original dataset
+	X['df'] = np.empty((0,4)) # Keep track of the original dataset
 
 	q = defaultdict(lambda: OurQueue())  # Prepare counters for time windows
 	for stud_id in df["user_id"].unique():
-		df_stud = df[df["user_id"]==stud_id][["user_id", "item_id", "timestamp", "correct", "inter_id"]].copy()
+		df_stud = df[df["user_id"]==stud_id][["user_id", "item_id", "timestamp",
+                                        "correct", #"inter_id"
+                                        ]].copy()
 		df_stud.sort_values(by="timestamp", inplace=True) # Sort values 
 		df_stud = np.array(df_stud)
 		X['df'] = np.vstack((X['df'], df_stud))
@@ -187,8 +189,8 @@ if __name__ == "__main__":
 		tw = None
 	#LIST_OF_BOUNDARIES = [1/24, 1, 7, 30, np.inf]
 
-	df = pd.read_csv('preprocessed_data.csv', sep="\t")
+	df = pd.read_csv('preprocessed_data.csv')
 	qmat = sparse.load_npz('q_mat.npz').toarray()
-	X  = df_to_sparse(df, qmat, active_features, tw=tw)
+	X  = df_to_sparse(df, qmat, active_features, tw=tw, verbose=False)
 	sparse.save_npz('X-{:s}.npz'.format(features_suffix), X)
 
